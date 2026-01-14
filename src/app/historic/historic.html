@@ -1,0 +1,36 @@
+<div class="global-summary" style="margin-top: 40px;">
+  <h2>📊 Résumé des Bénéfices par Année</h2>
+  
+  <div class="table-container">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Valeur (Ticker)</th>
+          <th *ngFor="let year of availableYears">{{ year }}</th>
+          <th class="total-col">Total Cumulé</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ticker of tickers">
+          <td class="ticker-name">{{ ticker }}</td>
+          <td *ngFor="let year of availableYears" 
+              [style.color]="(yearlyStats[year][ticker] || 0) >= 0 ? 'green' : 'red'">
+            {{ (yearlyStats[year][ticker] || 0) | number:'1.2-2' }}€
+          </td>
+          <td class="total-col" style="font-weight: bold;">
+             {{ getTotalForTicker(ticker) | number:'1.2-2' }}€
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="grand-total">
+          <td>TOTAL ANNUEL</td>
+          <td *ngFor="let year of availableYears" style="font-weight: bold;">
+            {{ getTotalForYear(year) | number:'1.2-2' }}€
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

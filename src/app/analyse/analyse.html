@@ -1,0 +1,70 @@
+<div class="container" style="padding: 20px; max-width: 1000px; margin: auto;">
+  <h1> Mon Suivi Boursier</h1>
+
+  <mat-form-field appearance="fill" style="width: 100%; margin-bottom: 20px;">
+    <mat-label>Choisir une valeur</mat-label>
+    <mat-select (selectionChange)="onTickerChange($event.value)">
+      <mat-option *ngFor="let ticker of tickers" [value]="ticker">
+        {{ ticker }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div *ngIf="selectedTicker">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>Historique : {{ selectedTicker }}</h2>
+      <span class="badge">{{ groupedTransactions[selectedTicker].length }} opérations</span>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Quantité</th>
+            <th>Prix U.</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of groupedTransactions[selectedTicker]">
+            <td>{{ t.date | date:'dd/MM/yyyy' }}</td>
+            <td [style.color]="typeColors[t.type] || 'black'" style="font-weight: bold;">
+              {{ t.type }}
+            </td>
+            <td>{{ t.quantite }}</td>
+            <td>{{ t.prixUnitaire | number:'1.2-2' }}€</td>
+            <td style="font-weight: bold;">{{ t.total | number:'1.2-2' }}€</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="selectedStats" class="stats-grid">
+
+      <div class="stat-card pru">
+        <label>PRU (Prix de revient)</label>
+        <div class="value">{{ selectedStats.pru | number:'1.2-2' }}€</div>
+        <small>Sur {{ selectedStats.totalAchat | number:'1.0-0' }}€ d'achats</small>
+      </div>
+
+      <div class="stat-card">
+        <label>Titres en main</label>
+        <div class="value">{{ selectedStats.quantiteActuelle }}</div>
+        <small>Unités restantes</small>
+      </div>
+
+      <div class="stat-card" [ngClass]="selectedStats.profitRealise >= 0 ? 'positive' : 'negative'">
+        <label>Bénéfice Réalisé</label>
+        <div class="value">{{ selectedStats.profitRealise | number:'1.2-2' }}€</div>
+        <small>{{ selectedStats.rendement | number:'1.1-2' }}%</small>
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="!selectedTicker" style="text-align: center; padding: 50px; color: #666; border: 2px dashed #ccc;">
+    Veuillez sélectionner une action ci-dessus pour voir le détail.
+  </div>
+</div>

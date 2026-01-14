@@ -1,0 +1,34 @@
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+
+  th, td {
+    padding: 12px 15px;
+    text-align: right;
+    border-bottom: 1px solid #eee;
+  }
+
+  th:first-child, td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: white;
+    font-weight: bold;
+  }
+
+  .ticker-name { color: #1976d2; }
+  
+  .total-col {
+    background-color: #fcfcfc;
+    border-left: 2px solid #eee;
+  }
+
+  .grand-total {
+    background-color: #e3f2fd;
+    font-size: 1.1em;
+  }
+}
