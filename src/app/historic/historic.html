@@ -1,34 +1,76 @@
 <div class="global-summary" style="margin-top: 40px;">
-  <h2>📊 Résumé des Bénéfices par Année</h2>
+  <h2>Résumé des Bénéfices par Année</h2>
   
   <div class="table-container">
     <table class="summary-table">
       <thead>
         <tr>
           <th>Valeur (Ticker)</th>
-          <th *ngFor="let year of availableYears">{{ year }}</th>
-          <th class="total-col">Total Cumulé</th>
+          @for(year of availableYears; track year) { <th>{{ year }}</th> }
+          <th class="total-col">Cumulé</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let ticker of tickers">
-          <td class="ticker-name">{{ ticker }}</td>
-          <td *ngFor="let year of availableYears" 
-              [style.color]="(yearlyStats[year][ticker] || 0) >= 0 ? 'green' : 'red'">
-            {{ (yearlyStats[year][ticker] || 0) | number:'1.2-2' }}€
-          </td>
-          <td class="total-col" style="font-weight: bold;">
-             {{ getTotalForTicker(ticker) | number:'1.2-2' }}€
-          </td>
-        </tr>
+        @for(ticker of tickers; track ticker) {
+          <tr>
+            <td class="ticker-name">{{ ticker }}</td>
+            @for(year of availableYears; track year) {
+              <td [style.color]="(yearlyStats[year][ticker] || 0) >= 0 ? 'green' : 'red'">
+                @if(getDividend(year, ticker) > 0) {
+                  <div>
+                    <small style="font-size: 0.85em; color: #1976d2;">
+                      (+{{ getDividend(year, ticker) | number:'1.2-2' }}€)
+                    </small>
+                  </div>
+                }
+                <div>
+                  {{ (yearlyStats[year][ticker] || 0) | number:'1.2-2' }}€
+                </div>
+              </td>
+            }
+            <td class="total-col" style="font-weight: bold;">
+              @if(getTickerDividendTotal(ticker) > 0) {
+                <div style="font-size: 0.85em; color: #1976d2; font-weight: normal;">
+                  (+{{ getTickerDividendTotal(ticker) | number:'1.2-2' }}€)
+                </div>
+              }
+              <div>
+                {{ getTotalForTicker(ticker) | number:'1.2-2' }}€
+              </div>
+            </td>
+            <td style="font-weight: bold;">{{ getTickerDividendTotal(ticker) + getTotalForTicker(ticker) | number:'1.2-2' }}€</td>
+          </tr>
+        }
       </tbody>
       <tfoot>
         <tr class="grand-total">
           <td>TOTAL ANNUEL</td>
-          <td *ngFor="let year of availableYears" style="font-weight: bold;">
-            {{ getTotalForYear(year) | number:'1.2-2' }}€
+          @for(year of availableYears; track year) {
+            <td style="font-weight: bold;">
+              <div>
+                <small style="font-size: 0.85em; color: #1976d2;">
+                  (+{{ getYearlyDividendTotal(year) | number:'1.2-2' }}€)
+                </small>
+              </div>
+              <div>
+                {{ getTotalForYear(year) | number:'1.2-2' }}€
+              </div>
+            </td>
+          }
+          <td style="font-weight: bold;"> 
+            <div>
+              <small style="font-size: 0.85em; color: #1976d2;">
+                (+{{ getGrandTotalDividend() | number:'1.2-2' }}€)
+              </small>
+            </div>
+            <div>
+              {{ getGrandTotal() | number:'1.2-2' }}€
+            </div>
           </td>
-          <td></td>
+          <td style="font-weight: bold;">
+            {{ getGrandTotalDividend() + getGrandTotal() | number:'1.2-2' }}€
+          </td>
         </tr>
       </tfoot>
     </table>

@@ -32,7 +32,7 @@ export class FinanceService {
       } else if (t.type === 'VENTE') {
         totalVente += t.total;
         quantiteVendue += t.quantite;
-      } else if (t.type === 'DIVIDENDE') {
+      } else if (t.type === 'DIVIDENDE' || t.type === 'PAI.ITTCPN') {
         totalVente += t.total;
       }
     });
@@ -110,5 +110,28 @@ export class FinanceService {
     });
 
     return yearlyPnL;
+  }
+
+  calculateYearlyDividends(allTransactions: Transaction[]): YearlyPerformance {
+    const yearlyDividends: YearlyPerformance = {};
+
+    allTransactions.forEach(t => {
+      if (t.type === 'DIVIDENDE' || t.type === 'PAI.ITTCPN') {
+        const year = new Date(t.date).getFullYear();
+        const ticker = t.ticker;
+
+        if (!yearlyDividends[year]) {
+          yearlyDividends[year] = {};
+        }
+
+        if (!yearlyDividends[year][ticker]) {
+          yearlyDividends[year][ticker] = 0;
+        }
+
+        yearlyDividends[year][ticker] += t.total;
+      }
+    });
+
+    return yearlyDividends;
   }
 }

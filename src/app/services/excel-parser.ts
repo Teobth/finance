@@ -35,7 +35,7 @@ export class ExcelParserService {
     return data
     .filter(item => {
       const firstWord = item.libellé ? item.libellé.split(' ')[0] : '';
-      return firstWord !== 'VIR';
+      return firstWord !== 'VIR' && firstWord !== 'TAXE';
     })
     .map(item => {
       const parts = item.libellé ? item.libellé.split(' ') : [];
