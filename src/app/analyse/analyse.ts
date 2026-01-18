@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Transaction } from '../models/transaction';
 import { ExcelParserService } from '../services/excel-parser';
 import { FinanceService } from '/home/teo/programme/stock-tracker/src/app/services/finance';
@@ -21,18 +21,17 @@ import { FinanceService } from '/home/teo/programme/stock-tracker/src/app/servic
 
 export class Analyse {
   allTransactions: Transaction[] = [];
-
   groupedTransactions: { [key: string]: Transaction[] } = {};
-
   tickers: string[] = [];
-
   selectedTicker: string | null = null;
   selectedStats: import("/home/teo/programme/stock-tracker/src/app/services/finance").TickerStats | undefined;
 
   constructor(
     private excelService: ExcelParserService,
     private financeService: FinanceService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private route: ActivatedRoute
     ) {}
 
   async ngOnInit() {
@@ -43,6 +42,13 @@ export class Analyse {
       
       this.groupData();
       console.log("Titres trouvés (tickers) :", this.tickers);
+
+      this.route.paramMap.subscribe(params => {
+        const tickerFromUrl = params.get('ticker');
+        if(tickerFromUrl && this.groupedTransactions[tickerFromUrl]) {
+          this.applySelection(tickerFromUrl);
+        }
+      });
 
       this.cdr.detectChanges();
 
@@ -64,8 +70,12 @@ export class Analyse {
   }
 
   onTickerChange(ticker: string) {
+    this.router.navigate(['/analyse', ticker]);
+  }
+
+  private applySelection(ticker: string) {
     this.selectedTicker = ticker;
-    const transactions = this.groupedTransactions[ticker];
+    const transactions = this.groupedTransactions[ticker] || [];
     this.selectedStats = this.financeService.calculateStats(transactions);
   }
 

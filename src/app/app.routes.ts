@@ -4,6 +4,7 @@ import { Analyse } from './analyse/analyse';
 
 export const routes: Routes = [
     { path: 'analyse', component: Analyse },
+    { path: 'analyse/:ticker', component: Analyse },
     { path: 'historique', component: Historic },
     { path: '', component: Analyse },
 ];

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FinanceService, YearlyPerformance } from '../services/finance';
 import { Transaction } from '../models/transaction';
 import { ExcelParserService } from '../services/excel-parser';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-historic',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './historic.html',
   styleUrl: './historic.scss',
 })

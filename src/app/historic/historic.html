@@ -14,7 +14,9 @@
       <tbody>
         @for(ticker of tickers; track ticker) {
           <tr>
-            <td class="ticker-name">{{ ticker }}</td>
+            <td class="ticker-name">
+              <a [routerLink]="['/analyse', ticker]">{{ ticker }}</a>
+            </td>
             @for(year of availableYears; track year) {
               <td [style.color]="(yearlyStats[year][ticker] || 0) >= 0 ? 'green' : 'red'">
                 @if(getDividend(year, ticker) > 0) {
