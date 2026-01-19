@@ -1,39 +1,45 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { Transaction } from '../models/transaction';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { RawExcelRow } from '../models/rawExcelRow';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelParserService {
 
+  private _transactions = signal<Transaction[]>([]);
+  public transactions = this._transactions.asReadonly();
+  public isLoading = signal<boolean>(false);
+
   constructor(private http: HttpClient) {}
 
-  public transactions: Transaction[] = [];
-  
-  async parseExcel(): Promise<Transaction[]> {
+  async loadTransactions() {
+    if (this._transactions().length > 0) return;
+
+    this.isLoading.set(true);
     try {
-      console.log("1. Requête HTTP lancée...");
       const data = await firstValueFrom(
         this.http.get('testStock.xlsx', { responseType: 'arraybuffer' })
       );
-      
-      console.log("2. Fichier reçu, lecture Excel en cours...");
       const workbook = XLSX.read(data, { type: 'array', cellDates: true });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const parsed = this.mapToTransactions(jsonData);
+      const sorted = parsed.sort((a, b) => b.date.getTime() - a.date.getTime());
       
-      console.log("3. Données extraites :", jsonData.length, "lignes");
-      return this.mapToTransactions(jsonData);
+      this._transactions.set(sorted);
     } catch (error) {
-      console.error("Erreur critique dans parseExcel :", error);
-      throw error;
+      console.error('Erreur lors du chargement Excel', error);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   private mapToTransactions(data: any[]): Transaction[] {
     return data
     .filter(item => {
+      //const libellé = item['libellé'] ?? '';
       const firstWord = item.libellé ? item.libellé.split(' ')[0] : '';
       return firstWord !== 'VIR' && firstWord !== 'TAXE';
     })

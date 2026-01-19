@@ -1,9 +1,8 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Transaction } from '../models/transaction';
 import { ExcelParserService } from '../services/excel-parser';
 import { FinanceService } from '/home/teo/programme/stock-tracker/src/app/services/finance';
 
@@ -20,63 +19,49 @@ import { FinanceService } from '/home/teo/programme/stock-tracker/src/app/servic
 })
 
 export class Analyse {
-  allTransactions: Transaction[] = [];
-  groupedTransactions: { [key: string]: Transaction[] } = {};
-  tickers: string[] = [];
-  selectedTicker: string | null = null;
-  selectedStats: import("/home/teo/programme/stock-tracker/src/app/services/finance").TickerStats | undefined;
+  selectedTicker = signal<string | null>(null);
+
+  private excelService = inject(ExcelParserService);
+  private financeService = inject(FinanceService);
+
+  // Liste des tickers unique calculée automatiquement
+  tickers = computed(() => {
+    const all = this.excelService.transactions().map(t => t.ticker);
+    return [...new Set(all)].sort();
+  });
+
+  // Stats calculées automatiquement quand le ticker OU les données changent
+  selectedStats = computed(() => {
+    const ticker = this.selectedTicker();
+    const all = this.excelService.transactions();
+    
+    if (!ticker) return undefined;
+    
+    const tickerTransactions = all.filter(t => t.ticker === ticker);
+    return this.financeService.calculateStats(tickerTransactions);
+  });
 
   constructor(
-    private excelService: ExcelParserService,
-    private financeService: FinanceService,
-    private cdr: ChangeDetectorRef,
-    private router: Router,
-    private route: ActivatedRoute
-    ) {}
-
-  async ngOnInit() {
-    console.log("Démarrage du chargement...");
-    try {
-      this.allTransactions = await this.excelService.parseExcel();
-      console.log("Transactions reçues :", this.allTransactions);
-      
-      this.groupData();
-      console.log("Titres trouvés (tickers) :", this.tickers);
-
-      this.route.paramMap.subscribe(params => {
-        const tickerFromUrl = params.get('ticker');
-        if(tickerFromUrl && this.groupedTransactions[tickerFromUrl]) {
-          this.applySelection(tickerFromUrl);
-        }
-      });
-
-      this.cdr.detectChanges();
-
-      this.excelService.transactions = await this.excelService.parseExcel();
-    } catch (error) {
-      console.error("Erreur lors du chargement de l'Excel :", error);
-    }
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+    // On écoute l'URL et on met à jour le signal selectedTicker
+    this.route.paramMap.subscribe(params => {
+      this.selectedTicker.set(params.get('ticker'));
+    });
+    
+    // On s'assure que les données sont chargées (le service gère si c'est déjà fait)
+    this.excelService.loadTransactions();
   }
 
-  groupData() {
-    this.groupedTransactions = this.allTransactions.reduce((groups: any, item) => {
-      const group = (groups[item.ticker] || []);
-      group.push(item);
-      groups[item.ticker] = group;
-      return groups;
-    }, {});
-
-    this.tickers = Object.keys(this.groupedTransactions);
-  }
+  filteredTransactions = computed(() => {
+    const ticker = this.selectedTicker();
+    const all = this.excelService.transactions();
+    return all.filter(t => t.ticker === ticker);
+  });
 
   onTickerChange(ticker: string) {
     this.router.navigate(['/analyse', ticker]);
-  }
-
-  private applySelection(ticker: string) {
-    this.selectedTicker = ticker;
-    const transactions = this.groupedTransactions[ticker] || [];
-    this.selectedStats = this.financeService.calculateStats(transactions);
   }
 
   readonly typeColors: Record<string, string> = {

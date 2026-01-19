@@ -4,7 +4,7 @@
   <mat-form-field appearance="fill" style="width: 100%; margin-bottom: 20px;">
     <mat-label>Choisir une valeur</mat-label>
     <mat-select (selectionChange)="onTickerChange($event.value)">
-      @for(ticker of tickers; track ticker) {
+      @for(ticker of tickers(); track ticker) {
       <mat-option [value]="ticker">
         {{ ticker }}
       </mat-option>
@@ -12,11 +12,11 @@
     </mat-select>
   </mat-form-field>
 
-  @if(selectedTicker) {
+  @if(selectedTicker()) {
     <div>
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Historique : {{ selectedTicker }}</h2>
-        <span class="badge">{{ groupedTransactions[selectedTicker].length }} opérations</span>
+        <h2>Historique : {{ selectedTicker() }}</h2>
+        <span class="badge">{{ filteredTransactions().length }} opérations</span>
       </div>
 
       <div class="table-container">
@@ -31,7 +31,7 @@
             </tr>
           </thead>
           <tbody>
-            @for(t of groupedTransactions[selectedTicker]; track t) {
+            @for(t of filteredTransactions(); track t) {
               <tr>
                 <td>{{ t.date | date:'dd/MM/yyyy' }}</td>
                 <td [style.color]="typeColors[t.type] || 'black'" style="font-weight: bold;">
@@ -46,32 +46,31 @@
         </table>
       </div>
 
-      @if(selectedStats) {
+      @if(selectedStats(); as stats) {
         <div class="stats-grid">
 
           <div class="stat-card pru">
             <label>PRU (Prix de revient)</label>
-            <div class="value">{{ selectedStats.pru | number:'1.2-2' }}€</div>
-            <small>Sur {{ selectedStats.totalAchat | number:'1.0-0' }}€ d'achats</small>
+            <div class="value">{{ stats.pru | number:'1.2-2' }}€</div>
+            <small>Sur {{ stats.totalAchat | number:'1.0-0' }}€ d'achats</small>
           </div>
 
           <div class="stat-card">
             <label>Titres en main</label>
-            <div class="value">{{ selectedStats.quantiteActuelle }}</div>
+            <div class="value">{{ stats.quantiteActuelle }}</div>
             <small>Unités restantes</small>
           </div>
 
-          <div class="stat-card" [ngClass]="selectedStats.profitRealise >= 0 ? 'positive' : 'negative'">
+          <div class="stat-card" [ngClass]="stats.profitRealise >= 0 ? 'positive' : 'negative'">
             <label>Bénéfice Réalisé</label>
-            <div class="value">{{ selectedStats.profitRealise | number:'1.2-2' }}€</div>
-            <small>{{ selectedStats.rendement | number:'1.1-2' }}%</small>
+            <div class="value">{{ stats.profitRealise | number:'1.2-2' }}€</div>
+            <small>{{ stats.rendement | number:'1.1-2' }}%</small>
           </div>
 
         </div>
       }
     </div>
   }
-
   @else {
     <div style="text-align: center; padding: 50px; color: #666; border: 2px dashed #ccc;">
       Veuillez sélectionner une action ci-dessus pour voir le détail.

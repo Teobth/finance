@@ -6,19 +6,19 @@
       <thead>
         <tr>
           <th>Valeur (Ticker)</th>
-          @for(year of availableYears; track year) { <th>{{ year }}</th> }
+          @for(year of availableYears(); track year) { <th>{{ year }}</th> }
           <th class="total-col">Cumulé</th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        @for(ticker of tickers; track ticker) {
+        @for(ticker of tickers(); track ticker) {
           <tr>
             <td class="ticker-name">
               <a [routerLink]="['/analyse', ticker]">{{ ticker }}</a>
             </td>
-            @for(year of availableYears; track year) {
-              <td [style.color]="(yearlyStats[year][ticker] || 0) >= 0 ? 'green' : 'red'">
+            @for(year of availableYears(); track year) {
+              <td [style.color]="(yearlyStats()[year][ticker] || 0) >= 0 ? 'green' : 'red'">
                 @if(getDividend(year, ticker) > 0) {
                   <div>
                     <small style="font-size: 0.85em; color: #1976d2;">
@@ -27,7 +27,7 @@
                   </div>
                 }
                 <div>
-                  {{ (yearlyStats[year][ticker] || 0) | number:'1.2-2' }}€
+                  {{ (yearlyStats()[year][ticker] || 0) | number:'1.2-2' }}€
                 </div>
               </td>
             }
@@ -48,7 +48,7 @@
       <tfoot>
         <tr class="grand-total">
           <td>TOTAL ANNUEL</td>
-          @for(year of availableYears; track year) {
+          @for(year of availableYears(); track year) {
             <td style="font-weight: bold;">
               <div>
                 <small style="font-size: 0.85em; color: #1976d2;">
