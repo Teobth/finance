@@ -26,7 +26,7 @@ export class FinanceService {
     let quantiteVendue = 0;
 
     transactions.forEach(t => {
-      if (t.type === 'ACHAT') {
+      if (t.type === 'ACHAT' || t.type === 'TAXE') {
         cumulCoutAchat += t.total;
         cumulQuantiteAchat += t.quantite;
       } else if (t.type === 'VENTE') {
@@ -79,11 +79,7 @@ export class FinanceService {
     
     const holdings: { [ticker: string]: { totalCost: number, quantity: number } } = {};
 
-    const sortedTransactions = [...allTransactions].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-
-    sortedTransactions.forEach(t => {
+    allTransactions.slice().reverse().forEach(t => {
       const year = new Date(t.date).getFullYear();
       const ticker = t.ticker;
 
@@ -91,7 +87,7 @@ export class FinanceService {
         holdings[ticker] = { totalCost: 0, quantity: 0 };
       }
 
-      if (t.type === 'ACHAT') {
+      if (t.type === 'ACHAT' || t.type === 'TAXE') {
         holdings[ticker].totalCost += t.total;
         holdings[ticker].quantity += t.quantite;
       } 
@@ -134,4 +130,6 @@ export class FinanceService {
 
     return yearlyDividends;
   }
+
+  
 }

@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { Transaction } from '../models/transaction';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { RawExcelRow } from '../models/rawExcelRow';
+import { APP_CONFIG } from '../core/constants';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelParserService {
@@ -39,10 +39,15 @@ export class ExcelParserService {
   private mapToTransactions(data: any[]): Transaction[] {
     return data
     .filter(item => {
-      //const libellé = item['libellé'] ?? '';
       const firstWord = item.libellé ? item.libellé.split(' ')[0] : '';
-      return firstWord !== 'VIR' && firstWord !== 'TAXE';
+      return firstWord !== 'VIR';// && firstWord !== 'TAXE';
     })
+    .map(item => ({
+      ...item,
+      libellé: item.libellé.startsWith('TAXE')
+        ? this.parseTaxe(item.libellé)
+        : item.libellé
+    }))
     .map(item => {
       const parts = item.libellé ? item.libellé.split(' ') : [];
       const type = parts[0]
@@ -66,5 +71,13 @@ export class ExcelParserService {
   private parseFrenchDate(dateStr: string): Date {
     const [day, month, year] = dateStr.split('/').map(Number);
     return new Date(year, month - 1, day);
+  }
+
+  private parseTaxe(libelle: string): string {
+    const parts = libelle.split(' ');
+    const isin = parts[3];
+    const ticker =
+    (APP_CONFIG.CODE_ISIN as Record<string, string>)[isin] ?? isin;
+    return `${parts[0]} 0 ${ticker}`;
   }
 }
