@@ -1,8 +1,8 @@
 <nav class="main-nav">
   <div class="brand">StockTracker</div>
   <div class="menu-links">
-    <a routerLink="/analyse" routerLinkActive="active">Détail par valeur</a>
-    <a routerLink="/historique" routerLinkActive="active">Résumé Annuel</a>
+    <a routerLink="/historique" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Résumé Annuel</a>
+    <a routerLink="/analyse" routerLinkActive="active-link">Détail par valeur</a>
   </div>
 </nav>
 

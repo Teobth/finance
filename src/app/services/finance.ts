@@ -77,34 +77,30 @@ export class FinanceService {
   calculateYearlyPnL(allTransactions: Transaction[]): YearlyPerformance {
     const yearlyPnL: YearlyPerformance = {};
     
-    const holdings: { [ticker: string]: { totalCost: number, quantity: number } } = {};
+    const holdings: Record<string, { totalCost: number; quantity: number }> = {};
 
-    allTransactions.slice().reverse().forEach(t => {
+    for (let i = allTransactions.length - 1; i >= 0; i--) {
+      const t = allTransactions[i];
       const year = new Date(t.date).getFullYear();
       const ticker = t.ticker;
 
-      if (!holdings[ticker]) {
-        holdings[ticker] = { totalCost: 0, quantity: 0 };
-      }
+      if (!holdings[ticker]) holdings[ticker] = { totalCost: 0, quantity: 0 };
 
       if (t.type === 'ACHAT' || t.type === 'TAXE') {
         holdings[ticker].totalCost += t.total;
         holdings[ticker].quantity += t.quantite;
       } 
-      else if (t.type === 'VENTE') {
+      else if (t.type === 'VENTE' && holdings[ticker].quantity > 0) {
         const shareOfCost = (holdings[ticker].totalCost / holdings[ticker].quantity) * t.quantite;
         const profit = t.total - shareOfCost;
 
         if (!yearlyPnL[year]) yearlyPnL[year] = {};
-        if (!yearlyPnL[year][ticker]) yearlyPnL[year][ticker] = 0;
-
-        yearlyPnL[year][ticker] += profit;
+        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + profit;
 
         holdings[ticker].totalCost -= shareOfCost;
         holdings[ticker].quantity -= t.quantite;
       }
-    });
-
+    }
     return yearlyPnL;
   }
 

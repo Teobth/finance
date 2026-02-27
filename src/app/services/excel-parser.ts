@@ -20,7 +20,7 @@ export class ExcelParserService {
     this.isLoading.set(true);
     try {
       const data = await firstValueFrom(
-        this.http.get('testStock.xlsx', { responseType: 'arraybuffer' })
+        this.http.get('dataStock.xlsx', { responseType: 'arraybuffer' })
       );
       const workbook = XLSX.read(data, { type: 'array', cellDates: true });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -40,7 +40,7 @@ export class ExcelParserService {
     return data
     .filter(item => {
       const firstWord = item.libellé ? item.libellé.split(' ')[0] : '';
-      return firstWord !== 'VIR';// && firstWord !== 'TAXE';
+      return firstWord !== 'VIR';
     })
     .map(item => ({
       ...item,

@@ -31,4 +31,38 @@
     background-color: #e3f2fd;
     font-size: 1.1em;
   }
+
+
+  //Bouton
+  .button {
+  color: #1976d2;
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #1976d2;
+  transform-origin: bottom right;
+  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+.button:hover {
+  color: #0d47a1;
+}
+
+.button:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
 }

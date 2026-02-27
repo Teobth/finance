@@ -50,7 +50,7 @@ export class Analyse {
       this.selectedTicker.set(params.get('ticker'));
     });
     
-    // On s'assure que les données sont chargées (le service gère si c'est déjà fait)
+    // On s'assure que les données sont chargées
     this.excelService.loadTransactions();
   }
 

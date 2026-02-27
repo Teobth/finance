@@ -5,46 +5,59 @@
     <table class="summary-table">
       <thead>
         <tr>
-          <th>Valeur (Ticker)</th>
-          @for(year of availableYears(); track year) { <th>{{ year }}</th> }
-          <th class="total-col">Cumulé</th>
-          <th>Total</th>
+          <th><a class='button' (click)="toggleSortTicker()">Ticker</a></th>
+          
+          @for(year of availableYears(); track year) { 
+            <th><a class='button' (click)="toggleSortTickerOfYear(year)">{{ year }}</a></th> 
+          }
+          
+          <th class="total-col">Cumulé PnL</th>
+          <th><a class='button' (click)="toggleSortTickerTotal()">Total Global</a></th>
         </tr>
       </thead>
+
       <tbody>
         @for(ticker of tickers(); track ticker) {
           <tr>
             <td class="ticker-name">
               <a [routerLink]="['/analyse', ticker]">{{ ticker }}</a>
             </td>
+
             @for(year of availableYears(); track year) {
-              <td [style.color]="(yearlyStats()[year][ticker] || 0) >= 0 ? 'green' : 'red'">
-                @if(getDividend(year, ticker) > 0) {
+              @let pnl = getPnL(year, ticker);
+              @let div = getDividend(year, ticker);
+              
+              <td [style.color]="pnl >= 0 ? 'green' : 'red'">
+                @if(div > 0) {
                   <div>
                     <small style="font-size: 0.85em; color: #1976d2;">
-                      (+{{ getDividend(year, ticker) | number:'1.2-2' }}€)
+                      (+{{ div | number:'1.2-2' }}€)
                     </small>
                   </div>
                 }
-                <div>
-                  {{ (yearlyStats()[year][ticker] || 0) | number:'1.2-2' }}€
-                </div>
+                <div>{{ pnl | number:'1.2-2' }}€</div>
               </td>
             }
+
             <td class="total-col" style="font-weight: bold;">
-              @if(getTickerDividendTotal(ticker) > 0) {
+              @let tDiv = getTickerDividendTotal(ticker);
+              @let tPnL = getTickerPnLTotal(ticker);
+              
+              @if(tDiv > 0) {
                 <div style="font-size: 0.85em; color: #1976d2; font-weight: normal;">
-                  (+{{ getTickerDividendTotal(ticker) | number:'1.2-2' }}€)
+                  (+{{ tDiv | number:'1.2-2' }}€)
                 </div>
               }
-              <div>
-                {{ getTotalForTicker(ticker) | number:'1.2-2' }}€
-              </div>
+              <div>{{ tPnL | number:'1.2-2' }}€</div>
             </td>
-            <td style="font-weight: bold;">{{ getTickerDividendTotal(ticker) + getTotalForTicker(ticker) | number:'1.2-2' }}€</td>
+
+            <td style="font-weight: bold;">
+              {{ (getTickerPnLTotal(ticker) + getTickerDividendTotal(ticker)) | number:'1.2-2' }}€
+            </td>
           </tr>
         }
       </tbody>
+
       <tfoot>
         <tr class="grand-total">
           <td>TOTAL ANNUEL</td>
@@ -55,23 +68,21 @@
                   (+{{ getYearlyDividendTotal(year) | number:'1.2-2' }}€)
                 </small>
               </div>
-              <div>
-                {{ getTotalForYear(year) | number:'1.2-2' }}€
-              </div>
+              <div>{{ getYearlyPnLTotal(year) | number:'1.2-2' }}€</div>
             </td>
           }
+          
           <td style="font-weight: bold;"> 
             <div>
               <small style="font-size: 0.85em; color: #1976d2;">
-                (+{{ getGrandTotalDividend() | number:'1.2-2' }}€)
+                (+{{ grandTotalDividends() | number:'1.2-2' }}€)
               </small>
             </div>
-            <div>
-              {{ getGrandTotal() | number:'1.2-2' }}€
-            </div>
+            <div>{{ grandTotalPnL() | number:'1.2-2' }}€</div>
           </td>
-          <td style="font-weight: bold;">
-            {{ getGrandTotalDividend() + getGrandTotal() | number:'1.2-2' }}€
+          
+          <td style="font-weight: bold; font-size: 1.1em;">
+            {{ (grandTotalPnL() + grandTotalDividends()) | number:'1.2-2' }}€
           </td>
         </tr>
       </tfoot>
