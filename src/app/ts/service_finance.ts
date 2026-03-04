@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Transaction } from '../models/transaction';
+import { Transaction } from './interface_transaction';
 
 export interface TickerStats {
   totalAchat: number;
@@ -10,11 +10,26 @@ export interface TickerStats {
   rendement: number;
 }
 
-export interface YearlyPerformance {
+interface YearlyData<T> {
   [year: number]: {
     [ticker: string]: number;
   };
 }
+
+export type YearlyPerformance = YearlyData<number>;
+export type YearlyInvest = YearlyData<number>;
+
+// export interface YearlyPerformance {
+//   [year: number]: {
+//     [ticker: string]: number;
+//   };
+// }
+
+// export interface YearlyInvest {
+//   [year: number]: {
+//     [ticker: string]: number;
+//   };
+// }
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
@@ -53,26 +68,25 @@ export class FinanceService {
     };
   }
 
-  //Inutilisée
-  calculateYearlyGlobalStats(allTransactions: Transaction[]): YearlyPerformance {
-    const yearlyData: YearlyPerformance = {};
+  // calculateYearlyGlobalStats(allTransactions: Transaction[]): YearlyPerformance {
+  //   const yearlyData: YearlyPerformance = {};
 
-    allTransactions.forEach(t => {
-      const year = new Date(t.date).getFullYear();
-      const ticker = t.ticker;
+  //   allTransactions.forEach(t => {
+  //     const year = new Date(t.date).getFullYear();
+  //     const ticker = t.ticker;
 
-      if (!yearlyData[year]) yearlyData[year] = {};
-      if (!yearlyData[year][ticker]) yearlyData[year][ticker] = 0;
+  //     if (!yearlyData[year]) yearlyData[year] = {};
+  //     if (!yearlyData[year][ticker]) yearlyData[year][ticker] = 0;
 
-      if (t.type === 'ACHAT') {
-        yearlyData[year][ticker] -= t.total;
-      } else {
-        yearlyData[year][ticker] += t.total;
-      }
-    });
+  //     if (t.type === 'ACHAT') {
+  //       yearlyData[year][ticker] -= t.total;
+  //     } else {
+  //       yearlyData[year][ticker] += t.total;
+  //     }
+  //   });
 
-    return yearlyData;
-  }
+  //   return yearlyData;
+  // }
 
   calculateYearlyPnL(allTransactions: Transaction[]): YearlyPerformance {
     const yearlyPnL: YearlyPerformance = {};
@@ -112,20 +126,53 @@ export class FinanceService {
         const year = new Date(t.date).getFullYear();
         const ticker = t.ticker;
 
-        if (!yearlyDividends[year]) {
-          yearlyDividends[year] = {};
-        }
+        yearlyDividends[year] ??= {};
+        yearlyDividends[year][ticker] = (yearlyDividends[year][ticker] ?? 0) + t.total;
 
-        if (!yearlyDividends[year][ticker]) {
-          yearlyDividends[year][ticker] = 0;
-        }
-
-        yearlyDividends[year][ticker] += t.total;
       }
     });
 
     return yearlyDividends;
   }
 
-  
+  calculateInvestMax(allTransactions: Transaction[]): YearlyInvest {
+    const yearlyInvest: YearlyInvest = {};
+    const currentRunningBalance: Record<string, number> = {};
+    
+    // 1. Tri unique
+    const sorted = [...allTransactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    let lastYearProcessed = -1;
+
+    for (const t of sorted) {
+      const year = new Date(t.date).getFullYear();
+      const { ticker, type, total } = t;
+
+      // 2. Si on change d'année, on reporte les soldes actuels 
+      // pour que le "Max" de la nouvelle année commence avec l'existant
+      if (year !== lastYearProcessed) {
+        yearlyInvest[year] = {};
+        for (const tk in currentRunningBalance) {
+          yearlyInvest[year][tk] = currentRunningBalance[tk];
+        }
+        lastYearProcessed = year;
+      }
+
+      // 3. Mise à jour de la balance
+      currentRunningBalance[ticker] ??= 0;
+      if (type === 'ACHAT' || type === 'TAXE') {
+        currentRunningBalance[ticker] += total;
+      } else if (type === 'VENTE') {
+        currentRunningBalance[ticker] = Math.max(0, currentRunningBalance[ticker] - total);
+      }
+
+      // 4. Calcul du Pic (Max)
+      yearlyInvest[year][ticker] = Math.max(
+        yearlyInvest[year][ticker] ?? 0,
+        currentRunningBalance[ticker]
+      );
+    }
+
+    return yearlyInvest;
+  }
 }

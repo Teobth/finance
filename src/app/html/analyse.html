@@ -68,6 +68,24 @@
           </div>
 
         </div>
+        <div>
+          <table class="invest-table">
+            <thead>
+              <tr>
+                <th>Année</th>
+                <th>Investissement Max Atteint</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(data of investHistoryForSelectedTicker(); track data) {
+                <tr>
+                  <td>{{ data.year }}</td>
+                  <td>{{ data.amount | currency:'EUR':'symbol':'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
   }

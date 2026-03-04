@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { Transaction } from '../models/transaction';
+import { Transaction } from './interface_transaction';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { APP_CONFIG } from '../core/constants';
+import { APP_CONFIG } from './const_constants';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelParserService {

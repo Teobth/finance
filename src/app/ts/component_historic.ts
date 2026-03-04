@@ -1,17 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FinanceService, YearlyPerformance } from '../services/finance';
-import { ExcelParserService } from '../services/excel-parser';
-import { RouterLink, RouterLinkActive } from "@angular/router";
+import { FinanceService, YearlyPerformance } from './service_finance';
+import { ExcelParserService } from './service_excel-parser';
+import { RouterLink } from "@angular/router";
 
 type SortType = { column: 'NAME' | 'TOTAL' | 'YEAR', year?: number };
 
 @Component({
   selector: 'app-historic',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './historic.html',
-  styleUrl: './historic.scss',
+  imports: [CommonModule, RouterLink],
+  templateUrl: '../html/historic.html',
+  styleUrl: '../scss/historic.scss',
 })
 export class Historic {
 

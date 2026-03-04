@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { Historic } from './historic/historic';
-import { Analyse } from './analyse/analyse';
+import { Historic } from './ts/component_historic';
+import { Analyse } from './ts/component_analyse';
 import { H } from '@angular/cdk/keycodes';
 
 export const routes: Routes = [

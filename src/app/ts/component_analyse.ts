@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ExcelParserService } from '../services/excel-parser';
-import { FinanceService } from '/home/teo/programme/stock-tracker/src/app/services/finance';
+import { ExcelParserService } from './service_excel-parser';
+import { FinanceService } from './service_finance';
 
 @Component({
   selector: 'app-analyse',
-  templateUrl: './analyse.html',
-  styleUrl: './analyse.scss',
+  templateUrl: '../html/analyse.html',
+  styleUrl: '../scss/analyse.scss',
   imports: [
     CommonModule, 
     MatSelectModule, 
@@ -53,6 +53,23 @@ export class Analyse {
     // On s'assure que les données sont chargées
     this.excelService.loadTransactions();
   }
+
+  yearlyInvestMax = computed(() =>
+    this.financeService.calculateInvestMax(this.excelService.transactions())
+  );
+
+  investHistoryForSelectedTicker = computed(() => {
+    const ticker = this.selectedTicker();
+    const allInvestData = this.yearlyInvestMax();
+
+    if (!ticker || !allInvestData) return [];
+
+    return Object.keys(allInvestData)
+      .map(year => ({
+        year: +year,
+        amount: allInvestData[+year][ticker] || 0
+      }))
+  });
 
   filteredTransactions = computed(() => {
     const ticker = this.selectedTicker();
