@@ -67,8 +67,13 @@ export class Analyse {
     return Object.keys(allInvestData)
       .map(year => ({
         year: +year,
-        amount: allInvestData[+year][ticker] || 0
+        amount: allInvestData[+year][ticker] || 0,
+        pnl: this.financeService.getPnL(+year, ticker) + this.financeService.getDividend(+year, ticker),
+        performance: allInvestData[+year][ticker] 
+          ? ((this.financeService.getPnL(+year, ticker) + this.financeService.getDividend(+year, ticker)) / allInvestData[+year][ticker]) * 100 
+          : 0
       }))
+      .filter(data => data.amount > 0);
   });
 
   filteredTransactions = computed(() => {

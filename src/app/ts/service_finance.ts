@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Transaction } from './interface_transaction';
+import { ExcelParserService } from './service_excel-parser';
 
 export interface TickerStats {
   totalAchat: number;
@@ -19,20 +20,11 @@ interface YearlyData<T> {
 export type YearlyPerformance = YearlyData<number>;
 export type YearlyInvest = YearlyData<number>;
 
-// export interface YearlyPerformance {
-//   [year: number]: {
-//     [ticker: string]: number;
-//   };
-// }
-
-// export interface YearlyInvest {
-//   [year: number]: {
-//     [ticker: string]: number;
-//   };
-// }
-
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
+
+  private excelService = inject(ExcelParserService);
+  transactions = this.excelService.transactions;
 
   calculateStats(transactions: Transaction[]): TickerStats {
     let cumulCoutAchat = 0;
@@ -67,26 +59,6 @@ export class FinanceService {
       rendement: cumulCoutAchat > 0 ? (profitRealise / cumulCoutAchat) * 100 : 0
     };
   }
-
-  // calculateYearlyGlobalStats(allTransactions: Transaction[]): YearlyPerformance {
-  //   const yearlyData: YearlyPerformance = {};
-
-  //   allTransactions.forEach(t => {
-  //     const year = new Date(t.date).getFullYear();
-  //     const ticker = t.ticker;
-
-  //     if (!yearlyData[year]) yearlyData[year] = {};
-  //     if (!yearlyData[year][ticker]) yearlyData[year][ticker] = 0;
-
-  //     if (t.type === 'ACHAT') {
-  //       yearlyData[year][ticker] -= t.total;
-  //     } else {
-  //       yearlyData[year][ticker] += t.total;
-  //     }
-  //   });
-
-  //   return yearlyData;
-  // }
 
   calculateYearlyPnL(allTransactions: Transaction[]): YearlyPerformance {
     const yearlyPnL: YearlyPerformance = {};
@@ -174,5 +146,29 @@ export class FinanceService {
     }
 
     return yearlyInvest;
+  }
+
+  yearlyStats = computed(() =>
+    this.calculateYearlyPnL(this.transactions())
+  );
+
+  yearlyDividends = computed(() =>
+    this.calculateYearlyDividends(this.transactions())
+  );
+
+  availableYears = computed(() => {
+    const year = new Set([
+      ...Object.keys(this.yearlyStats()).map(Number),
+      ...Object.keys(this.yearlyDividends()).map(Number),
+    ]);
+    return Array.from(year).sort((a, b) => a - b);
+  });
+
+  getPnL(year: number, ticker: string): number {
+    return this.yearlyStats()[year]?.[ticker] || 0;
+  }
+
+  getDividend(year: number, ticker: string): number {
+    return this.yearlyDividends()[year]?.[ticker] || 0;
   }
 }

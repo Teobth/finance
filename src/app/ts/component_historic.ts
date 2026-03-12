@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FinanceService, YearlyPerformance } from './service_finance';
-import { ExcelParserService } from './service_excel-parser';
 import { RouterLink } from "@angular/router";
 
 type SortType = { column: 'NAME' | 'TOTAL' | 'YEAR', year?: number };
@@ -15,28 +14,14 @@ type SortType = { column: 'NAME' | 'TOTAL' | 'YEAR', year?: number };
 })
 export class Historic {
 
-  private excelService = inject(ExcelParserService);
   private financeService = inject(FinanceService);
 
   private sortCriteria = signal<SortType>({ column: 'NAME' });
 
-  transactions = this.excelService.transactions;
-
-  yearlyStats = computed(() =>
-    this.financeService.calculateYearlyPnL(this.transactions())
-  );
-
-  yearlyDividends = computed(() =>
-    this.financeService.calculateYearlyDividends(this.transactions())
-  );
-  
-  availableYears = computed(() => {
-    const year = new Set([
-      ...Object.keys(this.yearlyStats()).map(Number),
-      ...Object.keys(this.yearlyDividends()).map(Number),
-    ]);
-    return Array.from(year).sort((a, b) => a - b);
-  });
+  transactions = this.financeService.transactions;
+  yearlyStats = this.financeService.yearlyStats;
+  yearlyDividends = this.financeService.yearlyDividends
+  availableYears = this.financeService.availableYears
   
   tickers = computed(() => {
     const list = [...new Set(this.transactions().map(t => t.ticker))].filter(t => t !== '');
@@ -69,11 +54,11 @@ export class Historic {
   }
 
   getPnL(year: number, ticker: string): number {
-    return this.yearlyStats()[year]?.[ticker] || 0;
+    return this.financeService.getPnL(year, ticker);
   }
 
   getDividend(year: number, ticker: string): number {
-    return this.yearlyDividends()[year]?.[ticker] || 0;
+    return this.financeService.getDividend(year, ticker);
   }
 
   getYearlyTotal(year: number): number {
