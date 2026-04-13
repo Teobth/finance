@@ -26,7 +26,7 @@
               <th>Date</th>
               <th>Type</th>
               <th>Quantité</th>
-              <th>Prix U.</th>
+              <th>Montant U.</th>
               <th>Total</th>
             </tr>
           </thead>
@@ -80,7 +80,7 @@
             </thead>
             <tbody>
               @for(data of investHistoryForSelectedTicker(); track data) {
-                <tr>
+                <tr class="stat-card" [ngClass]="data.pnl >= 0 ? 'positive' : 'negative'">
                   <td>{{ data.year }}</td>
                   <td>{{ data.amount | currency:'EUR':'symbol':'1.2-2' }}</td>
                   <td>{{ data.pnl | currency:'EUR':'symbol':'1.2-2' }}</td>
