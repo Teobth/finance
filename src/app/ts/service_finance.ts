@@ -148,6 +148,35 @@ export class FinanceService {
     return yearlyInvest;
   }
 
+  calculateGlobalYearlyStats(): { year: number; amount: number; pnl: number; performance: number }[] {
+    const yearlyDeposits = this.excelService.yearlyDeposits();
+    const pnl = this.yearlyStats();
+    const dividends = this.yearlyDividends();
+
+    const allYears = new Set([
+      ...Object.keys(yearlyDeposits).map(Number),
+      ...Object.keys(pnl).map(Number),
+      ...Object.keys(dividends).map(Number),
+    ]);
+
+    return Array.from(allYears)
+      .sort((a, b) => a - b)
+      .map(year => {
+        const amount = yearlyDeposits[year] || 0;
+        const yearPnl = Object.values(pnl[year] || {}).reduce((a, b) => a + b, 0);
+        const yearDiv = Object.values(dividends[year] || {}).reduce((a, b) => a + b, 0);
+        const totalGain = yearPnl + yearDiv;
+
+        return {
+          year,
+          amount,
+          pnl: totalGain,
+          performance: amount > 0 ? (totalGain / amount) * 100 : 0
+        };
+      })
+      .filter(d => d.amount > 0);
+  }
+
   yearlyStats = computed(() =>
     this.calculateYearlyPnL(this.transactions())
   );

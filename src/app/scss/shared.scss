@@ -1,0 +1,106 @@
+// Table de base
+$positive: #2e7d32;
+$positive-light: #f1f8f1;
+$negative: #d32f2f;
+$negative-light: #fdf3f3;
+$primary: #1976d2;
+$primary-light: #e3f2fd;
+$border: #eee;
+$text-muted: #666;
+
+.table-container {
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+
+  th {
+    background-color: #f5f5f5;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-muted;
+  }
+
+  td {
+    padding: 12px 15px;
+    border-bottom: 1px solid $border;
+  }
+
+  tbody tr:hover {
+    background-color: #fafafa;
+  }
+}
+
+// Carte stat
+.stat-card {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 5px solid #ccc;
+
+  label { font-size: 0.8em; color: $text-muted; text-transform: uppercase; letter-spacing: 0.05em; }
+  .value { font-size: 1.4em; font-weight: bold; margin-top: 5px; }
+
+  &.positive {
+    border-left-color: $positive;
+    background: $positive-light;
+    color: $positive;
+    .value, small { color: $positive; }
+  }
+  &.negative {
+    border-left-color: $negative;
+    background: $negative-light;
+    color: $negative;
+    .value, small { color: $negative; }
+  }
+}
+
+// Badge
+.badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+// Bouton lien animé
+.button {
+  color: #1976d2;
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  transition: color 0.3s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #1976d2;
+    transform-origin: bottom right;
+    transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+  }
+
+  &:hover {
+    color: #0d47a1;
+    &::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+  }
+}

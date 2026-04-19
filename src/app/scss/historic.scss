@@ -1,68 +1,49 @@
-.summary-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
+@use 'shared' as *;
 
-  th, td {
-    padding: 12px 15px;
-    text-align: right;
-    border-bottom: 1px solid #eee;
-  }
+.summary-table {
+  th, td { text-align: right; }
 
   th:first-child, td:first-child {
     text-align: left;
     position: sticky;
     left: 0;
     background: white;
+    z-index: 1;
     font-weight: bold;
+    border-right: 2px solid $border;
   }
 
-  .ticker-name { color: #1976d2; }
-  
+  // Alternance de couleur de ligne
+  tbody tr:nth-child(even) { background-color: #fafafa; }
+  tbody tr:hover { background-color: $primary-light; }
+
+  .ticker-name a {
+    color: $primary;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover { text-decoration: underline; }
+  }
+
   .total-col {
-    background-color: #fcfcfc;
-    border-left: 2px solid #eee;
+    background-color: #f9f9f9;
+    border-left: 2px solid $border;
+    font-weight: 600;
   }
 
   .grand-total {
-    background-color: #e3f2fd;
-    font-size: 1.1em;
+    background-color: $primary-light;
+    font-size: 1.05em;
+    border-top: 2px solid $primary;
+
+    td { 
+      font-weight: bold;
+      color: #0d47a1;
+    }
   }
 
-
-  //Bouton
-  .button {
-  color: #1976d2;
-  text-decoration: none;
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.button::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: -2px;
-  left: 0;
-  background-color: #1976d2;
-  transform-origin: bottom right;
-  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
-}
-
-.button:hover {
-  color: #0d47a1;
-}
-
-.button:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
+  // Dividendes en bleu discret
+  small { 
+    color: $primary;
+    opacity: 0.85;
+  }
 }

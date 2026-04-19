@@ -8,15 +8,18 @@ import { APP_CONFIG } from './const_constants';
 @Injectable({ providedIn: 'root' })
 export class ExcelParserService {
 
+  private _deposits = signal<number>(0);
   private _transactions = signal<Transaction[]>([]);
+  private _yearlyDeposits = signal<Record<number, number>>({});
+  public deposits = this._deposits.asReadonly();
   public transactions = this._transactions.asReadonly();
+  public yearlyDeposits = this._yearlyDeposits.asReadonly();
   public isLoading = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
 
   async loadTransactions() {
     if (this._transactions().length > 0) return;
-
     this.isLoading.set(true);
     try {
       const data = await firstValueFrom(
@@ -25,9 +28,34 @@ export class ExcelParserService {
       const workbook = XLSX.read(data, { type: 'array', cellDates: true });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      const yearlyDeposits: Record<number, number> = {};
+      let runningBalance = 0;
+
+      const virements = jsonData
+        .filter((item: any) => item.libellé?.split(' ')[0] === 'VIR')
+        .map((item: any) => ({
+          date: this.parseFrenchDate(item['Date valeur']),
+          amount: (+item.Crédit || 0) - Math.abs(+item.Débit || 0)
+        }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      for (const vir of virements) {
+        const year = vir.date.getFullYear();
+        runningBalance += vir.amount;
+        yearlyDeposits[year] = Math.max(yearlyDeposits[year] || 0, runningBalance);
+      }
+
+      // Reporter le max des années précédentes dans les années suivantes
+      const years = Object.keys(yearlyDeposits).map(Number).sort((a, b) => a - b);
+      for (let i = 1; i < years.length; i++) {
+        yearlyDeposits[years[i]] = Math.max(yearlyDeposits[years[i]], yearlyDeposits[years[i - 1]]);
+      }
+
+      this._yearlyDeposits.set(yearlyDeposits);
+
       const parsed = this.mapToTransactions(jsonData);
       const sorted = parsed.sort((a, b) => b.date.getTime() - a.date.getTime());
-      
       this._transactions.set(sorted);
     } catch (error) {
       console.error('Erreur lors du chargement Excel', error);

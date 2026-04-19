@@ -1,0 +1,20 @@
+@use 'shared' as *;
+
+.perf-table {
+  width: 40%;
+  margin: 0 auto;
+
+  th, td { text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+
+  tbody tr {
+    &.positive {
+      td { background-color: $positive-light; }
+      td:last-child { color: $positive; font-weight: bold; }
+    }
+    &.negative {
+      td { background-color: $negative-light; }
+      td:last-child { color: $negative; font-weight: bold; }
+    }
+  }
+}

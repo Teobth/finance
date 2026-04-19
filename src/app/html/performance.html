@@ -1,1 +1,20 @@
-<p>component-impot works!</p>
+<table class="table-container perf-table">
+  <thead>
+    <tr>
+      <th>Année</th>
+      <th>Investissement Max Atteint</th>
+      <th>Plus-value</th>
+      <th>Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for(data of globalYearlyStats(); track data.year) {
+      <tr [ngClass]="data.pnl >= 0 ? 'positive' : 'negative'">
+        <td>{{ data.year }}</td>
+        <td>{{ data.amount | currency:'EUR':'symbol':'1.2-2' }}</td>
+        <td>{{ data.pnl | currency:'EUR':'symbol':'1.2-2' }}</td>
+        <td>{{ data.performance | number:'1.2-2' }}%</td>
+      </tr>
+    }
+  </tbody>
+</table>

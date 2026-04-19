@@ -76,6 +76,10 @@ export class Analyse {
       .filter(data => data.amount > 0);
   });
 
+  globalYearlyStats = computed(() =>
+    this.financeService.calculateGlobalYearlyStats()
+  );
+
   filteredTransactions = computed(() => {
     const ticker = this.selectedTicker();
     const all = this.excelService.transactions();
