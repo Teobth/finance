@@ -1,7 +1,7 @@
 @use 'shared' as *;
 
 .perf-table {
-  width: 40%;
+  width: 60%;
   margin: 0 auto;
 
   th, td { text-align: right; }
@@ -11,10 +11,95 @@
     &.positive {
       td { background-color: $positive-light; }
       td:last-child { color: $positive; font-weight: bold; }
+      td:nth-last-child(3) {
+        color: $positive;
+        font-weight: bold;
+      }
     }
     &.negative {
       td { background-color: $negative-light; }
       td:last-child { color: $negative; font-weight: bold; }
+      td:nth-last-child(3) {
+        color: $negative;
+        font-weight: bold;
+      }
     }
+  }
+}
+
+.chart-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-bottom: 30px;
+  overflow-x: auto;   // ← scroll horizontal sur le wrapper
+  overflow-y: visible;
+
+  h2 {
+    margin: 0 0 15px;
+    font-size: 1.1em;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: sticky;  // ← titre reste visible pendant le scroll
+    left: 0;
+  }
+
+  apx-chart {
+    display: block;    // ← important pour que la largeur soit respectée
+  }
+}
+
+// Tooltip chart custom
+:host ::ng-deep .chart-tooltip {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0;
+  min-width: 220px;
+  font-size: 0.85em;
+
+  .tooltip-header {
+    background: #f5f5f5;
+    padding: 8px 12px;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0;
+    color: #444;
+    letter-spacing: 0.05em;
+  }
+
+  .tooltip-body {
+    padding: 8px 12px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child { border-bottom: none; }
+  }
+
+  .tooltip-ticker { color: #555; }
+  .tooltip-value { font-weight: 600; }
+
+  .tooltip-empty {
+    color: #999;
+    font-style: italic;
+    padding: 4px 0;
+  }
+
+  .tooltip-footer {
+    padding: 8px 12px;
+    font-weight: bold;
+    border-top: 2px solid #eee;
+    border-radius: 0 0 8px 8px;
+    background: #fafafa;
+    text-align: right;
   }
 }

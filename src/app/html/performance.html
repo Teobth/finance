@@ -1,19 +1,38 @@
+<div class="chart-wrapper">
+  <h2>Gains & Pertes Mensuels</h2>
+  <apx-chart
+    [series]="chartSeries()"
+    [chart]="chart()"
+    [plotOptions]="plotOptions"
+    [xaxis]="xaxis()"
+    [yaxis]="yaxis"
+    [dataLabels]="dataLabels"
+    [tooltip]="tooltip()"
+    [colors]="colors()"
+    [legend]="legend"
+  />
+</div>
+
 <table class="table-container perf-table">
   <thead>
     <tr>
       <th>Année</th>
-      <th>Investissement Max Atteint</th>
       <th>Plus-value</th>
-      <th>Performance</th>
+      <th>Investi (dépôts)</th>
+      <th>Perf. / dépôts</th>
+      <th>Investi (+ gains cumulés)</th>
+      <th>Perf. / gains cumulés</th>
     </tr>
   </thead>
   <tbody>
     @for(data of globalYearlyStats(); track data.year) {
       <tr [ngClass]="data.pnl >= 0 ? 'positive' : 'negative'">
         <td>{{ data.year }}</td>
-        <td>{{ data.amount | currency:'EUR':'symbol':'1.2-2' }}</td>
         <td>{{ data.pnl | currency:'EUR':'symbol':'1.2-2' }}</td>
+        <td>{{ data.amount | currency:'EUR':'symbol':'1.2-2' }}</td>
         <td>{{ data.performance | number:'1.2-2' }}%</td>
+        <td>{{ data.amountWithPnL | currency:'EUR':'symbol':'1.2-2' }}</td>
+        <td>{{ data.performanceWithPnL | number:'1.2-2' }}%</td>
       </tr>
     }
   </tbody>
