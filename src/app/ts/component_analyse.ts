@@ -94,6 +94,8 @@ export class Analyse {
     'ACHAT': '#2e7d32',
     'VENTE': '#d32f2f',
     'DIVIDENDE': '#1976d2',
+    'PAI.ITTCPN': '#1976d2',
+    'LIQUIDATION': '#1976d2',
     'TAXE': '#757575'
   };
 }

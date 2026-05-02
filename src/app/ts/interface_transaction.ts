@@ -1,7 +1,7 @@
 export interface Transaction {
   id: string;
   date: Date;
-  type: 'ACHAT' | 'VENTE' | 'TAXE' | 'DIVIDENDE' | 'PAI.ITTCPN' | 'VIR';
+  type: 'ACHAT' | 'VENTE' | 'TAXE' | 'DIVIDENDE' | 'LIQUIDATION' | 'CRD' | 'PAI.ITTCPN' | 'VIR';
   ticker: string;
   quantite: number;
   prixUnitaire: number;

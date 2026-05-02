@@ -39,7 +39,7 @@ export class FinanceService {
       } else if (t.type === 'VENTE') {
         totalVente += t.total;
         quantiteVendue += t.quantite;
-      } else if (t.type === 'DIVIDENDE' || t.type === 'PAI.ITTCPN') {
+      } else if (t.type === 'DIVIDENDE' || t.type === 'PAI.ITTCPN' || t.type === 'LIQUIDATION') {
         totalVente += t.total;
       }
     });
@@ -85,6 +85,16 @@ export class FinanceService {
 
         holdings[ticker].totalCost -= shareOfCost;
         holdings[ticker].quantity -= t.quantite;
+      }
+
+      else if (t.type === 'LIQUIDATION') {  // ← comme un dividende
+        if (!yearlyPnL[year]) yearlyPnL[year] = {};
+        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + t.total;
+      }
+
+      else if (t.type === 'CRD') {
+        if (!yearlyPnL[year]) yearlyPnL[year] = {};
+        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) - t.total;
       }
     }
     return yearlyPnL;
@@ -215,8 +225,10 @@ export class FinanceService {
         monthlyPnL[key][ticker] = (monthlyPnL[key][ticker] || 0) + profit;
         holdings[ticker].totalCost -= shareOfCost;
         holdings[ticker].quantity -= t.quantite;
-      } else if (type === 'DIVIDENDE' || type === 'PAI.ITTCPN') {
+      } else if (type === 'DIVIDENDE' || type === 'PAI.ITTCPN' || type === 'LIQUIDATION') {
         monthlyPnL[key][ticker] = (monthlyPnL[key][ticker] || 0) + total;
+      } else if (type === 'CRD') {
+        monthlyPnL[key][ticker] = (monthlyPnL[key][ticker] || 0) - total;
       }
     }
 

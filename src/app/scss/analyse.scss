@@ -9,10 +9,11 @@
 
 // Couleurs de fond subtiles par type dans le tableau des transactions
 tbody tr {
-  &.type-achat { background-color: rgba(46, 125, 50, 0.04); }
-  &.type-vente { background-color: rgba(211, 47, 47, 0.04); }
-  &.type-dividende { background-color: rgba(25, 118, 210, 0.04); }
-  &.type-taxe { background-color: rgba(117, 117, 117, 0.04); }
+  &.type-achat                              { background-color: rgba(46, 125, 50, 0.04); }
+  &.type-vente                              { background-color: rgba(211, 47, 47, 0.04); }
+  &.type-taxe, &.type-crd                   { background-color: rgba(117, 117, 117, 0.04); }
+  &.type-dividende, &.type-pai\.ittcpn,
+  &.type-liquidation                        { background-color: rgba(25, 118, 210, 0.04); }
 }
 
 // Tableau investissement par année

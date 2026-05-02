@@ -24,23 +24,25 @@ export class Historic {
   availableYears = this.financeService.availableYears
   
   tickers = computed(() => {
-    const list = [...new Set(this.transactions().map(t => t.ticker))].filter(t => t !== '');
+    const all = [...new Set(this.transactions().map(t => t.ticker))].filter(t => t !== '');    
     const criteria = this.sortCriteria();
     const pnl = this.yearlyStats();
     const divs = this.yearlyDividends();
 
-    return list.sort((a, b) => {
+    const special = all.filter(t => t === 'FRAIS SRD');
+    const normal = all.filter(t => t !== 'FRAIS SRD');
+
+    const sorted = normal.sort((a, b) => {
       switch (criteria.column) {
         case 'TOTAL':
-          return (this.getTickerTotal(b, pnl, divs)) - (this.getTickerTotal(a, pnl, divs));
+          return this.getTickerTotal(b, pnl, divs) - this.getTickerTotal(a, pnl, divs);
         case 'YEAR':
-          const valA = pnl[criteria.year!]?.[a] || 0;
-          const valB = pnl[criteria.year!]?.[b] || 0;
-          return valB - valA;
+          return (pnl[criteria.year!]?.[b] || 0) - (pnl[criteria.year!]?.[a] || 0);
         default:
           return a.localeCompare(b);
       }
     });
+    return [...sorted, ...special];
   });
 
   private getTickerTotal(ticker: string, pnl: YearlyPerformance, divs: YearlyPerformance): number {

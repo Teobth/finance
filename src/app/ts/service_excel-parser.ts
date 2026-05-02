@@ -65,16 +65,20 @@ export class ExcelParserService {
   }
 
   private mapToTransactions(data: any[]): Transaction[] {
-    return data
+    return data 
     .filter(item => {
       const firstWord = item.libellé ? item.libellé.split(' ')[0] : '';
-      return firstWord !== 'VIR';
+      return ['ACHAT', 'VENTE', 'TAXE', 'DIVIDENDE', 'PAI.ITTCPN', 'LIQUIDATION', 'CRD'].includes(firstWord);
     })
     .map(item => ({
       ...item,
       libellé: item.libellé.startsWith('TAXE')
         ? this.parseTaxe(item.libellé)
-        : item.libellé
+        : item.libellé.startsWith('LIQUIDATION')
+          ? this.parseLiquidation(item.libellé)
+          : item.libellé.startsWith('CRD')
+            ? this.parseCRD(item.libellé)
+            : item.libellé
     }))
     .map(item => {
       const parts = item.libellé ? item.libellé.split(' ') : [];
@@ -107,5 +111,15 @@ export class ExcelParserService {
     const ticker =
     (APP_CONFIG.CODE_ISIN as Record<string, string>)[isin] ?? isin;
     return `${parts[0]} 0 ${ticker}`;
+  }
+
+  private parseLiquidation(libelle: string): string {
+    const parts = libelle.split(' ');
+    const ticker = parts.slice(1).join(' ');
+    return `LIQUIDATION 0 ${ticker}`;
+  }
+
+  private parseCRD(libelle: string): string {
+    return `CRD 0 FRAIS SRD`;
   }
 }
