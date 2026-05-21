@@ -27,36 +27,61 @@ export class FinanceService {
   transactions = this.excelService.transactions;
 
   calculateStats(transactions: Transaction[]): TickerStats {
-    let cumulCoutAchat = 0;
-    let cumulQuantiteAchat = 0;
+    let totalAchat = 0;
+    let totalCost = 0;
+    let quantity = 0;
     let totalVente = 0;
-    let quantiteVendue = 0;
+    let profitRealise = 0;
 
-    transactions.forEach(t => {
-      if (t.type === 'ACHAT' || t.type === 'TAXE') {
-        cumulCoutAchat += t.total;
-        cumulQuantiteAchat += t.quantite;
-      } else if (t.type === 'VENTE') {
-        totalVente += t.total;
-        quantiteVendue += t.quantite;
-      } else if (t.type === 'DIVIDENDE' || t.type === 'PAI.ITTCPN' || t.type === 'LIQUIDATION') {
-        totalVente += t.total;
+    const sorted = [...transactions].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    for (const t of sorted) {
+      switch (t.type) {
+        case 'ACHAT':
+        case 'TAXE':
+          totalAchat += t.total;
+          totalCost += t.total;
+          quantity += t.quantite;
+          break;
+
+        case 'VENTE': {
+          const pruCourant = quantity > 0 ? totalCost / quantity : 0;
+          
+          const coutVente = pruCourant * t.quantite;
+          profitRealise += (t.total - coutVente);
+          
+          totalVente += t.total;
+          totalCost -= coutVente;
+          quantity -= t.quantite;
+
+          if (quantity <= 0) {
+            totalCost = 0;
+            quantity = 0;
+          }
+          break;
+        }
+
+        case 'DIVIDENDE':
+        case 'PAI.ITTCPN':
+        case 'LIQUIDATION':
+          totalVente += t.total;
+          profitRealise += t.total;
+          break;
       }
-    });
+    }
 
-    const quantiteActuelle = cumulQuantiteAchat - quantiteVendue;
-    
-    const pru = cumulQuantiteAchat > 0 ? cumulCoutAchat / cumulQuantiteAchat : 0;
-    
-    const profitRealise = totalVente - (pru * quantiteVendue);
+    const pruFinal = quantity > 0 ? totalCost / quantity : 0;
+    const rendement = totalAchat > 0 ? (profitRealise / totalAchat) * 100 : 0;
 
     return {
-      totalAchat: cumulCoutAchat,
-      totalVente: totalVente,
-      profitRealise: profitRealise,
-      quantiteActuelle: quantiteActuelle,
-      pru: pru,
-      rendement: cumulCoutAchat > 0 ? (profitRealise / cumulCoutAchat) * 100 : 0
+      totalAchat,
+      totalVente,
+      profitRealise,
+      quantiteActuelle: quantity,
+      pru: pruFinal,
+      rendement
     };
   }
 
@@ -65,36 +90,48 @@ export class FinanceService {
     
     const holdings: Record<string, { totalCost: number; quantity: number }> = {};
 
-    for (let i = allTransactions.length - 1; i >= 0; i--) {
-      const t = allTransactions[i];
+    for (const t of allTransactions.slice().reverse()) {
       const year = new Date(t.date).getFullYear();
       const ticker = t.ticker;
 
       if (!holdings[ticker]) holdings[ticker] = { totalCost: 0, quantity: 0 };
 
-      if (t.type === 'ACHAT' || t.type === 'TAXE') {
-        holdings[ticker].totalCost += t.total;
-        holdings[ticker].quantity += t.quantite;
-      } 
-      else if (t.type === 'VENTE' && holdings[ticker].quantity > 0) {
-        const shareOfCost = (holdings[ticker].totalCost / holdings[ticker].quantity) * t.quantite;
-        const profit = t.total - shareOfCost;
+      const h = holdings[ticker];
 
-        if (!yearlyPnL[year]) yearlyPnL[year] = {};
-        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + profit;
+      switch (t.type) {
+        case 'ACHAT':
+        case 'TAXE':
+          h.totalCost += t.total;
+          h.quantity += t.quantite;
+          break;
 
-        holdings[ticker].totalCost -= shareOfCost;
-        holdings[ticker].quantity -= t.quantite;
-      }
+        case 'VENTE':
+          if (h.quantity > 0) {
+            const shareOfCost = (h.totalCost / h.quantity) * t.quantite;
+            const profit = t.total - shareOfCost;
+            yearlyPnL[year] ??= {};
+            yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + profit;
+            h.totalCost -= shareOfCost;
+            h.quantity -= t.quantite;
 
-      else if (t.type === 'LIQUIDATION') {  // ← comme un dividende
-        if (!yearlyPnL[year]) yearlyPnL[year] = {};
-        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + t.total;
-      }
+            if (h.quantity <= 0) {
+              h.totalCost = 0;
+              h.quantity = 0;
+            }
+          }
+          break;
 
-      else if (t.type === 'CRD') {
-        if (!yearlyPnL[year]) yearlyPnL[year] = {};
-        yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) - t.total;
+        case 'DIVIDENDE':
+        case 'PAI.ITTCPN':
+        case 'LIQUIDATION':
+          yearlyPnL[year] ??= {};
+          yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + t.total;
+          break;
+
+        case 'CRD':
+          yearlyPnL[year] ??= {};
+          yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) - t.total;
+          break;
       }
     }
     return yearlyPnL;
