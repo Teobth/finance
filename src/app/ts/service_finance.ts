@@ -121,8 +121,6 @@ export class FinanceService {
           }
           break;
 
-        case 'DIVIDENDE':
-        case 'PAI.ITTCPN':
         case 'LIQUIDATION':
           yearlyPnL[year] ??= {};
           yearlyPnL[year][ticker] = (yearlyPnL[year][ticker] || 0) + t.total;
