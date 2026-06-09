@@ -1,6 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { Transaction } from './interface_transaction';
-import { ExcelParserService } from './service_excel-parser';
+import { ExcelParserService } from './service_CSV-parser';
 
 export interface TickerStats {
   totalAchat: number;
@@ -238,10 +238,16 @@ export class FinanceService {
       .filter(d => d.amount > 0);
   }
 
-  calculateMonthlyPnL(allTransactions: Transaction[]): { month: string; value: number; details: { ticker: string; value: number }[] }[] {
+  calculateMonthlyPnL(
+    allTransactions: Transaction[], 
+    monthlyPrices: Record<string, Record<string, number>> = {}
+  ) {
     const sorted = [...allTransactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const holdings: Record<string, { totalCost: number; quantity: number }> = {};
-    const monthlyPnL: Record<string, Record<string, number>> = {}; // ← par mois ET par ticker
+    const monthlyPnL: Record<string, Record<string, number>> = {};
+    
+    // 1. MODIFICATION : On stocke la quantité ET le coût total historique à fin de mois
+    const monthlyHoldingsSnapshot: Record<string, Record<string, { quantity: number; totalCost: number }>> = {};
 
     for (const t of sorted) {
       const date = new Date(t.date);
@@ -265,27 +271,61 @@ export class FinanceService {
       } else if (type === 'CRD') {
         monthlyPnL[key][ticker] = (monthlyPnL[key][ticker] || 0) - total;
       }
+
+      // 2. MODIFICATION : On enregistre l'état complet (quantité + coût) dans le snapshot
+      monthlyHoldingsSnapshot[key] = {};
+      for (const [tk, h] of Object.entries(holdings)) {
+        if (h.quantity > 0) {
+          monthlyHoldingsSnapshot[key][tk] = { 
+            quantity: h.quantity, 
+            totalCost: h.totalCost 
+          };
+        }
+      }
     }
 
-    // Génère tous les mois entre le premier et le dernier
     const keys = Object.keys(monthlyPnL).sort();
     if (keys.length === 0) return [];
 
-    const result: { month: string; value: number; details: { ticker: string; value: number }[] }[] = [];
+    const result = [];
     const [startYear, startMonth] = keys[0].split('-').map(Number);
     const [endYear, endMonth] = keys[keys.length - 1].split('-').map(Number);
 
     let y = startYear, m = startMonth;
+    
+    // 3. MODIFICATION : Typage mis à jour pour propager l'objet complet
+    let lastKnownHoldings: Record<string, { quantity: number; totalCost: number }> = {}; 
+
     while (y < endYear || (y === endYear && m <= endMonth)) {
       const key = `${y}-${String(m).padStart(2, '0')}`;
       const tickerData = monthlyPnL[key] || {};
+      
+      if (monthlyHoldingsSnapshot[key]) {
+        lastKnownHoldings = { ...monthlyHoldingsSnapshot[key] };
+      }
+
       const details = Object.entries(tickerData)
         .map(([ticker, value]) => ({ ticker, value }))
-        .sort((a, b) => b.value - a.value); // ← les plus gros gains en premier
+        .sort((a, b) => b.value - a.value);
 
+      // --- 4. MODIFICATION : CALCUL DE LA PLUS-VALUE LATENTE MENSUELLE ---
+      let latentPnL = 0;
+      const currentMonthPrices = monthlyPrices[key] || {};
+
+      for (const [ticker, asset] of Object.entries(lastKnownHoldings)) {
+        const price = currentMonthPrices[ticker] || 0; 
+        if (price > 0 && asset.quantity > 0) {
+          const currentValuation = asset.quantity * price;
+          // Plus-value latente = Valeur marché actuelle - Coût total d'achat historique
+          latentPnL += (currentValuation - asset.totalCost);
+        }
+      }
+
+      // 5. MODIFICATION : On injecte 'latentPnL' à la place de 'portfolioValuation'
       result.push({
         month: key,
-        value: details.reduce((acc, d) => acc + d.value, 0),
+        value: details.reduce((acc, d) => acc + d.value, 0), // PnL Réalisé + Dividendes
+        latentPnL, // 👈 Devient accessible pour votre composant graphique
         details
       });
 
@@ -296,7 +336,7 @@ export class FinanceService {
     return result.reverse();
   }
 
-  monthlyPnL = computed(() => this.calculateMonthlyPnL(this.transactions()));
+  monthlyPnL = computed(() => this.calculateMonthlyPnL(this.transactions(), this.excelService.monthlyPrices()));
 
   yearlyStats = computed(() =>
     this.calculateYearlyPnL(this.transactions())

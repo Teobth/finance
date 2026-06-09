@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ExcelParserService } from './service_excel-parser';
+import { ExcelParserService } from './service_CSV-parser';
 import { FinanceService } from './service_finance';
 
 @Component({

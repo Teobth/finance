@@ -9,10 +9,12 @@ export class ExcelParserService {
   private _deposits = signal<number>(0);
   private _transactions = signal<Transaction[]>([]);
   private _yearlyDeposits = signal<Record<number, number>>({});
+  private _monthlyPrices = signal<Record<string, Record<string, number>>>({});
   
   public deposits = this._deposits.asReadonly();
   public transactions = this._transactions.asReadonly();
   public yearlyDeposits = this._yearlyDeposits.asReadonly();
+  public monthlyPrices = this._monthlyPrices.asReadonly();
   public isLoading = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
@@ -22,30 +24,41 @@ export class ExcelParserService {
     this.isLoading.set(true);
     
     try {
-      // 1. On charge le fichier JSON unifié généré par le script
+      // 1. On charge le fichier JSON unifié des transactions
       const data = await firstValueFrom(
         this.http.get<any[]>('data/portfolio.json')
       );
 
-      // 2. Le JSON stocke les dates en chaînes de caractères (string).
-      // On les convertit en vrais objets Date JavaScript pour FinanceService.
+      // 2. Conversion des dates
       const parsedTransactions: Transaction[] = data.map(item => ({
         ...item,
         date: new Date(item.date)
       }));
 
-      // 3. Calcul automatique des dépôts annuels cumulés (gère Fortuneo + Trade Republic)
+      // ==========================================
+      // --- CHARGEMENT SÉCURISÉ DES PRIX ---
+      // ==========================================
+      try {
+        const prices = await firstValueFrom(this.http.get<any>('data/prices.json'));
+        this._monthlyPrices.set(prices);
+      } catch (priceError) {
+        // Si prices.json est absent ou invalide, on loggue un avertissement 
+        // et on met un objet vide pour ne pas bloquer l'application
+        console.warn("Avertissement: Impossible de charger 'data/prices.json'. Les valorisations mensuelles vaudront 0€.", priceError);
+        this._monthlyPrices.set({});
+      }
+      // ==========================================
+
+      // 3. Calcul automatique des dépôts annuels cumulés
       const yearlyDeposits: Record<number, number> = {};
       let runningBalance = 0;
 
-      // On isole les virements, triés du plus ancien au plus récent
       const virements = parsedTransactions
         .filter(t => t.type === 'CRE' || t.type === 'DEB')
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
       for (const vir of virements) {
         const year = vir.date.getFullYear();
-        // Le montant du virement est stocké dans 'total'
         if(vir.type === 'DEB') {
           runningBalance -= vir.total;
         } else {
@@ -54,7 +67,6 @@ export class ExcelParserService {
         yearlyDeposits[year] = Math.max(yearlyDeposits[year] || 0, runningBalance);
       }
 
-      // Reporter le max des années précédentes dans les années suivantes
       const years = Object.keys(yearlyDeposits).map(Number).sort((a, b) => a - b);
       for (let i = 1; i < years.length; i++) {
         yearlyDeposits[years[i]] = Math.max(yearlyDeposits[years[i]], yearlyDeposits[years[i - 1]]);
@@ -64,13 +76,13 @@ export class ExcelParserService {
 
       // 4. On filtre pour ne garder QUE les vraies transactions boursières dans le flux principal
       const tradeTransactions = parsedTransactions.filter(t => t.type !== 'DEB' && t.type !== 'CRE');
-      
       const sorted = tradeTransactions.sort((a, b) => b.date.getTime() - a.date.getTime());
       
+      // Cette ligne cruciale sera maintenant bien exécutée !
       this._transactions.set(sorted);
 
     } catch (error) {
-      console.error('Erreur lors du chargement du fichier portfolio.json', error);
+      console.error("Erreur critique lors du chargement des transactions principales :", error);
     } finally {
       this.isLoading.set(false);
     }

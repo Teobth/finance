@@ -31,7 +31,7 @@ const TICKER_MAPPING: Record<string, string> = {
   'AM.S&P500 SW.UCETF':                          'S&P 500',
   'CRD':                                         'FRAIS SRD',
   'ETC AMUNDI PHYS':                             'PHYS GOLD',
-  'Rare Earth & Strategic Metals USD (Acc)':     'REMX',
+  //'Rare Earth & Strategic Metals USD (Acc)':     'REMX',
   'VanEck Rare Earth and Strategic Metals UCITS ETF': 'REMX',
   'VAN.CR.BL.IN.USD-A':                         'DAPP',
   'VAN.DEF.USD-A-ACC':                           'DFNS',

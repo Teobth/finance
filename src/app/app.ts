@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLinkActive, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FinanceService } from './ts/service_finance';
-import { ExcelParserService } from './ts/service_excel-parser';
+import { ExcelParserService } from './ts/service_CSV-parser';
 
 @Component({
   selector: 'app-root',

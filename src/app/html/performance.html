@@ -1,16 +1,28 @@
 <div class="chart-wrapper">
   <h2>Gains & Pertes Mensuels</h2>
+  <div class="actions-container" style="margin-bottom: 15px;">
+    <button 
+      (click)="toggleLatent()" 
+      [class.active]="showLatent()"
+      style="padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s;"
+      [style.background-color]="showLatent() ? '#3B82F6' : '#E5E7EB'"
+      [style.color]="showLatent() ? 'white' : '#374151'"
+      [style.border]="'none'">
+      {{ showLatent() ? 'Masquer le Latent' : 'Afficher le Latent' }}
+    </button>
+  </div>
+
   <apx-chart
     [series]="chartSeries()"
     [chart]="chart()"
-    [plotOptions]="plotOptions"
     [xaxis]="xaxis()"
     [yaxis]="yaxis"
-    [dataLabels]="dataLabels"
-    [tooltip]="tooltip()"
     [colors]="colors()"
-    [legend]="legend"
-  />
+    [plotOptions]="plotOptions"
+    [tooltip]="tooltip()"
+    [dataLabels]="dataLabels"
+    [legend]="legend">
+  </apx-chart>
 </div>
 
 <table class="table-container perf-table">
