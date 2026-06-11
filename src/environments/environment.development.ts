@@ -1,4 +1,4 @@
 export const environment = {
-    production: true,
-    dataPath: '../demo-data/portfolio.json'
+    production: false,
+    dataPath: '../data/portfolio.json'
 };

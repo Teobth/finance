@@ -29,6 +29,8 @@ export class ExcelParserService {
       // const data = await firstValueFrom(
       //   this.http.get<any[]>('data/portfolio.json')
       // );
+      console.log("Mode Production ?", environment.production);
+      console.log("Fichier ciblé :", environment.dataPath);
       const data = await firstValueFrom(
         this.http.get<any[]>(environment.dataPath)
       );
