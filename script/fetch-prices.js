@@ -9,9 +9,8 @@ const yahooFinance = new YahooFinance();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ajuste ces deux chemins selon l'arborescence exacte de ton projet
-const PORTFOLIO_PATH = path.join(__dirname, '..', 'public', 'portfolio.json');
-const OUTPUT_PATH = path.join(__dirname, '..', 'public', 'prices.json'); 
+const PORTFOLIO_PATH = path.join(__dirname, '..', 'data', 'portfolio.json');
+const OUTPUT_PATH = path.join(__dirname, '..', 'data', 'prices.json'); 
 
 // 2. Dictionnaire de correspondance (Libellé de ton fichier -> Ticker Yahoo Finance)
 const TICKER_MAPPING = {
@@ -59,8 +58,7 @@ const TICKER_MAPPING = {
 
 // 2. Liste des lignes à ignorer complètement (Liquidités, comptes, etc.)
 const IGNORED_ASSETS = [
-  'BANNWARTH TEO', // Votre ligne de compte / cash interne
-  'OIHV'           // À enlever ou mapper si vous retrouvez le vrai ticker exact
+  'BANNWARTH TEO',
 ];
 
 async function generateMonthlyPrices() {
@@ -122,7 +120,7 @@ async function generateMonthlyPrices() {
           const price = record.adjClose || record.close;
           
           // IMPORTANT : On stocke le prix avec la clé textuelle d'origine (ex: 'TOTALENERGIES SE')
-          // pour que ton FinanceService Angular s'y retrouve automatiquement sans aucun recalcul.
+          // pour que FinanceService Angular s'y retrouve automatiquement sans aucun recalcul.
           finalPrices[monthKey][rawTicker] = Math.round(price * 100) / 100;
         }
       } catch (tickerError) {

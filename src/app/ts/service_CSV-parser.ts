@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Transaction } from './interface_transaction';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelParserService {
@@ -25,8 +26,11 @@ export class ExcelParserService {
     
     try {
       // 1. On charge le fichier JSON unifié des transactions
+      // const data = await firstValueFrom(
+      //   this.http.get<any[]>('data/portfolio.json')
+      // );
       const data = await firstValueFrom(
-        this.http.get<any[]>('data/portfolio.json')
+        this.http.get<any[]>(environment.dataPath)
       );
 
       // 2. Conversion des dates
