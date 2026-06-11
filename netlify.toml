@@ -1,3 +1,7 @@
+[build]
+  command = "npm run build"
+  publish = "dist/stock-tracker/browser"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
