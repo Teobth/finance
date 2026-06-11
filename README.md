@@ -29,7 +29,7 @@ Une application web moderne construite avec **Angular** permettant de suivre, d'
 Assurez-vous d'avoir installé [Node.js](https://nodejs.org/) et l'Angular CLI globalement (`npm install -g @angular/cli`).
 
 ### 2. Cloner le projet et installer les dépendances
-```bash
+
 git clone [https://github.com/Teobth/stock-tracker.git](https://github.com/Teobth/stock-tracker.git)
 cd stock-tracker
 npm install
