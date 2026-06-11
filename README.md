@@ -30,6 +30,6 @@ Assurez-vous d'avoir installé [Node.js](https://nodejs.org/) et l'Angular CLI g
 
 ### 2. Cloner le projet et installer les dépendances
 
-git clone [https://github.com/Teobth/stock-tracker.git](https://github.com/Teobth/stock-tracker.git)
+git clone https://github.com/Teobth/stock-tracker.git
 cd stock-tracker
 npm install
