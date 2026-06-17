@@ -221,7 +221,7 @@ function main() {
     .map(t => ({ ...t, ticker: resolveTicker(t.ticker) }))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const outputPath = path.join(__dirname, '..', 'data', 'portfolio.json');
+  const outputPath = path.join(__dirname, '..', 'public', 'portfolio.json');
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(allTransactions, null, 2), 'utf-8');
 

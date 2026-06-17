@@ -156,7 +156,7 @@ export class FinanceService {
     const yearlyInvest: YearlyInvest = {};
     const currentRunningBalance: Record<string, number> = {};
     
-    // 1. Tri unique
+    // Tri unique
     const sorted = [...allTransactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     let lastYearProcessed = -1;
@@ -165,7 +165,7 @@ export class FinanceService {
       const year = new Date(t.date).getFullYear();
       const { ticker, type, total } = t;
 
-      // 2. Si on change d'année, on reporte les soldes actuels 
+      // Si on change d'année, on reporte les soldes actuels 
       // pour que le "Max" de la nouvelle année commence avec l'existant
       if (year !== lastYearProcessed) {
         yearlyInvest[year] = {};
@@ -175,7 +175,7 @@ export class FinanceService {
         lastYearProcessed = year;
       }
 
-      // 3. Mise à jour de la balance
+      // Mise à jour de la balance
       currentRunningBalance[ticker] ??= 0;
       if (type === 'ACHAT' || type === 'TAXE') {
         currentRunningBalance[ticker] += total;
@@ -183,7 +183,7 @@ export class FinanceService {
         currentRunningBalance[ticker] = Math.max(0, currentRunningBalance[ticker] - total);
       }
 
-      // 4. Calcul du Pic (Max)
+      // Calcul du Pic (Max)
       yearlyInvest[year][ticker] = Math.max(
         yearlyInvest[year][ticker] ?? 0,
         currentRunningBalance[ticker]
@@ -246,7 +246,7 @@ export class FinanceService {
     const holdings: Record<string, { totalCost: number; quantity: number }> = {};
     const monthlyPnL: Record<string, Record<string, number>> = {};
     
-    // 1. MODIFICATION : On stocke la quantité ET le coût total historique à fin de mois
+    // On stocke la quantité ET le coût total historique à fin de mois
     const monthlyHoldingsSnapshot: Record<string, Record<string, { quantity: number; totalCost: number }>> = {};
 
     for (const t of sorted) {
@@ -272,7 +272,7 @@ export class FinanceService {
         monthlyPnL[key][ticker] = (monthlyPnL[key][ticker] || 0) - total;
       }
 
-      // 2. MODIFICATION : On enregistre l'état complet (quantité + coût) dans le snapshot
+      // On enregistre l'état complet (quantité + coût) dans le snapshot
       monthlyHoldingsSnapshot[key] = {};
       for (const [tk, h] of Object.entries(holdings)) {
         if (h.quantity > 0) {
@@ -293,7 +293,7 @@ export class FinanceService {
 
     let y = startYear, m = startMonth;
     
-    // 3. MODIFICATION : Typage mis à jour pour propager l'objet complet
+    // Typage mis à jour pour propager l'objet complet
     let lastKnownHoldings: Record<string, { quantity: number; totalCost: number }> = {}; 
 
     while (y < endYear || (y === endYear && m <= endMonth)) {
@@ -308,7 +308,7 @@ export class FinanceService {
         .map(([ticker, value]) => ({ ticker, value }))
         .sort((a, b) => b.value - a.value);
 
-      // --- 4. MODIFICATION : CALCUL DE LA PLUS-VALUE LATENTE MENSUELLE ---
+      // --- CALCUL DE LA PLUS-VALUE LATENTE MENSUELLE ---
       let latentPnL = 0;
       const currentMonthPrices = monthlyPrices[key] || {};
 
@@ -321,11 +321,10 @@ export class FinanceService {
         }
       }
 
-      // 5. MODIFICATION : On injecte 'latentPnL' à la place de 'portfolioValuation'
       result.push({
         month: key,
         value: details.reduce((acc, d) => acc + d.value, 0), // PnL Réalisé + Dividendes
-        latentPnL, // 👈 Devient accessible pour votre composant graphique
+        latentPnL,
         details
       });
 

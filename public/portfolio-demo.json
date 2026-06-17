@@ -1,5 +1,16 @@
 [
   {
+    "id": "test_depot_2026",
+    "date": "2026-01-01",
+    "type": "CRE",
+    "ticker": "DEPOT INITIAL 2026",
+    "quantite": 0,
+    "prixUnitaire": 0,
+    "frais": 0,
+    "total": 150000.00,
+    "source": "FORTUNEO"
+  },
+  {
     "id": "hist_0_202606",
     "date": "2026-06-08",
     "type": "VENTE",
@@ -152,6 +163,17 @@
     "frais": 5,
     "total": 32782.36,
     "source": "BOURSORAMA"
+  },
+  {
+    "id": "test_depot_2025",
+    "date": "2025-01-01",
+    "type": "CRE",
+    "ticker": "DEPOT INITIAL 2025",
+    "quantite": 0,
+    "prixUnitaire": 0,
+    "frais": 0,
+    "total": 200000.00,
+    "source": "FORTUNEO"
   },
   {
     "id": "cdc6f610-d11d-4acb-b02d-1f8a042fd157",

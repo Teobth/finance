@@ -25,13 +25,8 @@ export class ExcelParserService {
     this.isLoading.set(true);
     
     try {
-      // 1. On charge le fichier JSON unifié des transactions
-      // const data = await firstValueFrom(
-      //   this.http.get<any[]>('data/portfolio.json')
-      // );
-      console.log("Mode Production ?", environment.production);
-      console.log("Fichier ciblé :", environment.dataPath);
       const data = await firstValueFrom(
+        // this.http.get<any[]>('data/portfolio-demo.json')
         this.http.get<any[]>(environment.dataPath)
       );
 
@@ -84,7 +79,6 @@ export class ExcelParserService {
       const tradeTransactions = parsedTransactions.filter(t => t.type !== 'DEB' && t.type !== 'CRE');
       const sorted = tradeTransactions.sort((a, b) => b.date.getTime() - a.date.getTime());
       
-      // Cette ligne cruciale sera maintenant bien exécutée !
       this._transactions.set(sorted);
 
     } catch (error) {

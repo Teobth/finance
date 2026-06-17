@@ -33,7 +33,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 20px;
   margin-bottom: 30px;
-  overflow-x: auto;   // ← scroll horizontal sur le wrapper
+  overflow-x: auto;
   overflow-y: visible;
 
   h2 {
@@ -42,16 +42,15 @@
     color: #444;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    position: sticky;  // ← titre reste visible pendant le scroll
+    position: sticky;
     left: 0;
   }
 
   apx-chart {
-    display: block;    // ← important pour que la largeur soit respectée
+    display: block;
   }
 }
 
-// Tooltip chart custom
 :host ::ng-deep .chart-tooltip {
   background: white;
   border-radius: 8px;

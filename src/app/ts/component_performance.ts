@@ -11,6 +11,7 @@ import { ChartService } from './service_chart';
   templateUrl: '../html/performance.html',
   styleUrl: '../scss/performance.scss',
 })
+
 export class Performance {
   private chartWrapper = viewChild<ElementRef>('chartWrapper');
 
@@ -18,32 +19,36 @@ export class Performance {
   private chartService = inject(ChartService);
 
   globalYearlyStats = computed(() => this.financeService.calculateGlobalYearlyStats());
-
   private monthlyData = this.financeService.monthlyPnL;
 
-  // ✅ NOUVEAU : Signal pour piloter l'affichage (true = tout afficher, false = réalisé uniquement)
-  showLatent = signal<boolean>(true);
+  // Signal pour piloter l'affichage (true = avec latent, false = réalisé uniquement)
+  showLatent = signal<boolean>(false);
 
-  // Séries de données calculées dynamiquement
+  // 1. Vos séries se mettent à jour si showLatent change
   chartSeries = computed(() => {
     const series = [
       {
-        name: 'Gain / Perte Réalisé',
-        type: 'bar',
+        name: 'Performance Réalisée (Ventes)',
         data: this.monthlyData().map(d => d.value)
       }
     ];
 
-    // On ajoute la série latente uniquement si le bouton est activé
     if (this.showLatent()) {
       series.push({
-        name: 'Plus / Moins-value Latente',
-        type: 'bar',
+        name: 'Plus/Moins-values Latentes',
         data: this.monthlyData().map(d => d.latentPnL)
       });
     }
 
     return series;
+  });
+
+  // 2. Gestion dynamique des couleurs de barres (Réalisé vs Latent)
+  colors = computed(() => {
+    const allColors = this.chartService.getChartColors();
+    // Si latent masqué : on ne garde que la couleur du Réalisé (index 0)
+    // Si latent affiché : on prend la couleur Réalisé + couleur Latent (index 0 et index 2)
+    return this.showLatent() ? [allColors[0], allColors[2]] : [allColors[0]];
   });
 
   xaxis = computed(() =>
@@ -52,25 +57,24 @@ export class Performance {
 
   yaxis = this.chartService.currencyYAxis();
 
+  // On force le stacked: true pour que le latent s'empile proprement sur le réalisé
   chart = computed(() => this.chartService.barChart({ 
     height: 500,
-    width: Math.max(900, this.monthlyData().length * 50)
+    width: Math.max(900, this.monthlyData().length * 50),
+    stacked: true 
   }));
   
   plotOptions = this.chartService.barPlotOptions();
+  
   tooltip = computed(() => 
     this.chartService.customTooltip(this.monthlyData(), this.showLatent())
   );
 
-  // ✅ MODIFICATION : Les couleurs s'adaptent au nombre de séries affichées
-  colors = computed(() => 
-    this.showLatent() ? ['#10B981', '#3B82F6'] : ['#10B981']
-  );
-
   dataLabels = this.chartService.defaultDataLabels;
+  
+  // Utilise la légende du service (affichée uniquement si plusieurs séries)
   legend = this.chartService.defaultLegend;
 
-  // ✅ NOUVEAU : Méthode pour inverser l'état au clic du bouton
   toggleLatent() {
     this.showLatent.update(value => !value);
   }
