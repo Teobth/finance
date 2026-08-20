@@ -1,1 +1,34 @@
-@use 'shared';
+.container {
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.titre {
+  margin-bottom: 16px;
+}
+
+// Lien transparent autour du tag, pour ne pas casser le style du p-tag
+.ticker-name a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.font-mono {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.font-bold {
+  font-weight: 600;
+}
+
+// Ligne du total (footer du p-table)
+.grand-total-row td {
+  padding: 16px !important;
+  letter-spacing: 0.05em;
+}
+
+.total-amount {
+  color: var(--p-primary-color);
+  font-size: 1.2em;
+}
